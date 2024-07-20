@@ -15,20 +15,19 @@ interface HistoricalData {
 interface CoinPriceChartProps {
   isDarkMode: boolean;
   coinId: string;
-  historicalData: { name: string; prices: number[][]; };
+  historicalData: { date: string; price: number; }[] | undefined;
 }
 
 const CoinPriceChart: React.FC<CoinPriceChartProps> = ({ isDarkMode, coinId, historicalData }) => {
   const chartRef = useRef<HTMLCanvasElement>(null);
   const [timeRange, setTimeRange] = useState<string>('24h');
   const chartInstanceRef = useRef<Chart | null>(null);
-
   const filterDataByTimeRange = (data: HistoricalData[], range: string): HistoricalData[] => {
     const now = new Date();
     const pastDate = new Date();
     switch (range) {
       case '24h':
-        pastDate.setDate(now.getDate() - 1);
+        pastDate.setHours(now.getHours() - 24);
         break;
       case '7d':
         pastDate.setDate(now.getDate() - 7);
@@ -37,28 +36,21 @@ const CoinPriceChart: React.FC<CoinPriceChartProps> = ({ isDarkMode, coinId, his
         pastDate.setMonth(now.getMonth() - 1);
         break;
       default:
-        pastDate.setDate(now.getDate() - 1);
+        pastDate.setHours(now.getHours() - 24);
     }
-    return data.filter(d => new Date(d.date) >= pastDate);
+    return data.filter(d => new Date(d.date) >= pastDate && new Date(d.date) <= now);
   };
 
   useEffect(() => {
-    const transformData = (prices: number[][]): HistoricalData[] => {
-      return prices.map(priceEntry => ({
-        date: new Date(priceEntry[0]).toISOString(),
-        price: priceEntry[1],
-      }));
-    };
-
     const createChart = () => {
-      if (chartRef.current && historicalData) {
-        const transformedData = transformData(historicalData.prices);
-        const filteredData = filterDataByTimeRange(transformedData, timeRange);
-
-        if (chartInstanceRef.current) {
-          chartInstanceRef.current.destroy();
+      if (chartRef.current && historicalData && historicalData.length > 0) {
+        const filteredData = filterDataByTimeRange(historicalData, timeRange);
+    
+        if (filteredData.length === 0) {
+          console.log('No data available for the selected time range');
+          return;
         }
-
+        
         const ctx = chartRef.current.getContext('2d');
         if (ctx) {
           chartInstanceRef.current = new Chart(ctx, {
@@ -80,7 +72,11 @@ const CoinPriceChart: React.FC<CoinPriceChartProps> = ({ isDarkMode, coinId, his
                 x: {
                   type: 'time',
                   time: {
-                    unit: timeRange === '24h' ? 'hour' : 'day'
+                    unit: timeRange === '24h' ? 'hour' : 'day',
+                    displayFormats: {
+                      hour: 'HH:mm',
+                      day: 'MMM d',
+                    },
                   },
                   adapters: {
                     date: {

@@ -1,18 +1,16 @@
-// slices/coin.ts
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import api from '@/lib/axios';
-import { CoinTypes } from './types/CoinTypes';
-interface CoinProps extends CoinTypes { }
+import { CoinDescription, CoinTypes } from './types/CoinTypes';
 
-interface CoinDetails extends CoinProps { }
+interface CoinDetails extends CoinDescription {}
 
 interface CoinsState {
-  coins: CoinProps[];
+  coins: CoinTypes[];
   coinDetails: Record<string, CoinDetails>;
-  recentlyViewed: CoinProps[];
+  recentlyViewed: CoinTypes[];
   status: 'idle' | 'loading' | 'succeeded' | 'failed';
   error: string | null;
-  trendingCoins: CoinProps[];
+  trendingCoins: CoinTypes[];
   trendingStatus: 'idle' | 'loading' | 'succeeded' | 'failed';
   trendingError: string | null;
 }
@@ -28,7 +26,7 @@ const initialState: CoinsState = {
   trendingError: null,
 };
 
-export const fetchCoins = createAsyncThunk<CoinProps[], number>(
+export const fetchCoins = createAsyncThunk<CoinTypes[], number>(
   'coins/fetchCoins',
   async (page) => {
     const response = await api.get('https://api.coingecko.com/api/v3/coins/markets', {
@@ -44,33 +42,15 @@ export const fetchCoins = createAsyncThunk<CoinProps[], number>(
   }
 );
 
-export const fetchCoinDetails = createAsyncThunk<CoinProps, string>(
+export const fetchCoinDetails = createAsyncThunk<CoinDetails, string>(
   'coins/fetchCoinDetails',
   async (id) => {
     const response = await api.get(`https://api.coingecko.com/api/v3/coins/${id}`);
-    const coinData = response.data;
-    
-    // Transform the API response to match CoinProps
-    return {
-      id: coinData.id,
-      name: coinData.name,
-      symbol: coinData.symbol,
-      large: coinData.image.large,
-      data: {
-        price: coinData.market_data.current_price.usd,
-        price_change_percentage_24h: {
-          usd: coinData.market_data.price_change_percentage_24h
-        },
-        market_cap: coinData.market_data.market_cap.usd
-      },
-      image: coinData.image.thumb,
-      market_cap_rank: coinData.market_cap_rank,
-      genesis_date: coinData.genesis_date
-    };
+    return response.data;
   }
 );
 
-export const addToRecentlyViewed = createAsyncThunk<CoinProps[], CoinProps, { state: { coins: CoinsState } }>(
+export const addToRecentlyViewed = createAsyncThunk<CoinTypes[], CoinTypes, { state: { coins: CoinsState } }>(
   'coins/addToRecentlyViewed',
   async (coin, { getState }) => {
     const { coins } = getState();
@@ -86,11 +66,11 @@ export const addToRecentlyViewed = createAsyncThunk<CoinProps[], CoinProps, { st
   }
 );
 
-export const fetchTrendingCoins = createAsyncThunk<CoinProps[], void>(
+export const fetchTrendingCoins = createAsyncThunk<CoinTypes[], void>(
   'coins/fetchTrendingCoins',
   async () => {
     const response = await api.get('https://api.coingecko.com/api/v3/search/trending');
-    return response.data.coins.map((item: { item: CoinProps }) => item.item);
+    return response.data.coins.map((item: { item: CoinTypes }) => item.item);
   }
 );
 
@@ -103,7 +83,7 @@ const CoinsLogic = createSlice({
       .addCase(fetchCoins.pending, (state) => {
         state.status = 'loading';
       })
-      .addCase(fetchCoins.fulfilled, (state, action: PayloadAction<CoinProps[]>) => {
+      .addCase(fetchCoins.fulfilled, (state, action: PayloadAction<CoinTypes[]>) => {
         state.status = 'succeeded';
         state.coins = action.payload;
       })
@@ -122,13 +102,13 @@ const CoinsLogic = createSlice({
         state.status = 'failed';
         state.error = action.error.message || null;
       })
-      .addCase(addToRecentlyViewed.fulfilled, (state, action: PayloadAction<CoinProps[]>) => {
+      .addCase(addToRecentlyViewed.fulfilled, (state, action: PayloadAction<CoinTypes[]>) => {
         state.recentlyViewed = action.payload;
       })
       .addCase(fetchTrendingCoins.pending, (state) => {
         state.trendingStatus = 'loading';
       })
-      .addCase(fetchTrendingCoins.fulfilled, (state, action: PayloadAction<CoinProps[]>) => {
+      .addCase(fetchTrendingCoins.fulfilled, (state, action: PayloadAction<CoinTypes[]>) => {
         state.trendingStatus = 'succeeded';
         state.trendingCoins = action.payload;
       })

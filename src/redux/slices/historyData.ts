@@ -3,7 +3,7 @@ import api from '@/lib/axios';
 import { getCachedData, setCachedData } from '@/utils/cache'; // Adjust the import path as needed
 
 const API_URL = 'https://api.coingecko.com/api/v3';
-const API_KEY = 'CG-97DUqXCS3RhtHJ5h7eY8u2ft';
+const API_KEY = 'CG-Lr8jUWFFKeHA2kYui3e8Bkhh';
 
 interface HistoricalDataState {
   data: { name: string; prices: number[][] }[];

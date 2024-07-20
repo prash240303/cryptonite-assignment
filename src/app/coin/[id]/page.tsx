@@ -4,47 +4,17 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'next/navigation';
 import { fetchCoinDetails, addToRecentlyViewed } from '@/redux/slices/coin';
 import { fetchHistoricalData } from '@/redux/slices/historyData';
+import CoinPriceChart from '@/components/CoinPriceChart';
 import CoinBarChart from '@/components/CoinBarChart';
 import { setTheme } from '@/redux/slices/theme';
-import CoinPriceChart from '@/components/CoinPriceChart';
-import Store, { RootState } from '@/redux/store';
-
-interface MarketData {
-  current_price: { usd: number };
-  market_cap: { usd: number };
-  total_supply: number;
-  max_supply: number;
-  total_volume: { usd: number };
-  price_change_percentage_24h: number;
-  price_change_percentage_7d: number;
-  price_change_percentage_30d: number;
-}
-
-interface CoinData {
-  id: string;
-  name: string;
-  symbol: string;
-  image: { thumb: string };
-  market_data: MarketData;
-  description: { en: string };
-}
-
-interface HistoricalData {
-  name: string;
-  // Add other properties as needed
-}
+import { AppDispatch, RootState } from '@/redux/store';
+import { CoinDescription, HistoricalData } from '@/redux/slices/types/CoinTypes';
 
 const CoinPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const dispatch = useDispatch<typeof Store.dispatch>();
+  const dispatch = useDispatch<AppDispatch>();
   const [isDarkMode, setIsDarkMode] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const coinData = useSelector((state: RootState) => state.coins.coinDetails[id as string] as unknown as CoinData | undefined);
-  const historicalData = useSelector((state: RootState) =>
-    state.historicalData.data.find((data: HistoricalData) => data.name === id)
-  );
-  const themeMode = useSelector((state: RootState) => state.theme.isDarkMode);
+  const dm = useSelector((state: RootState) => state.theme.isDarkMode);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -54,82 +24,99 @@ const CoinPage: React.FC = () => {
         dispatch(setTheme(JSON.parse(savedTheme)));
       }
     }
-  }, [dispatch]);
+  }, [dispatch, dm]);
 
-  useEffect(() => {
-    if (id) {
-      dispatch(fetchCoinDetails(id))
-        .then((action: any) => {
-          if (action.payload) {
-            dispatch(addToRecentlyViewed(action.payload));
-          }
-        })
-        .catch((err: Error) => {
-          setError(`Failed to fetch coin details: ${err.message}`);
-        });
-      dispatch(fetchHistoricalData()).catch((err: Error) => {
-        setError(`Failed to fetch historical data: ${err.message}`);
-      });
-    }
-  }, [dispatch, id]);
+  const coinData = useSelector((state: RootState) => state.coins.coinDetails[id as string]);
+  const historicalData = useSelector((state: RootState) => state.historicalData.data.find((data) => data.name === id)) as HistoricalData | undefined;
 
   const handleDragStart = (e: React.DragEvent<HTMLDivElement>) => {
-    if (coinData && coinData.market_data) {
+    if (coinData) {
       const dragData = {
         id: coinData.id,
         name: coinData.name,
         symbol: coinData.symbol,
-        image: coinData.image?.thumb,
-        current_price: coinData.market_data.current_price?.usd,
+        image: coinData.image.thumb,
+        current_price: coinData.market_data.current_price.usd,
         price_change_percentage_24h: coinData.market_data.price_change_percentage_24h,
-        market_cap: coinData.market_data.market_cap?.usd,
+        market_cap: coinData.market_data.market_cap.usd,
       };
       e.dataTransfer.setData('text/plain', JSON.stringify(dragData));
     }
   };
 
-  if (error) {
-    return <div className="text-red-500">{error}</div>;
-  }
+  useEffect(() => {
+    if (id) {
+      dispatch(fetchCoinDetails(id)).then((action) => {
+        if (action.payload) {
+          const coinForRecentlyViewed = {
+            id: action.payload.id,
+            name: action.payload.name,
+            symbol: action.payload.symbol,
+            image: action.payload.image.thumb,
+            market_cap_rank: action.payload.market_cap_rank,
+            genesis_date: action.payload.genesis_date,
+          };
+          dispatch(addToRecentlyViewed(coinForRecentlyViewed));
+        }
+      });
+      dispatch(fetchHistoricalData(id));
+    }
+  }, [dispatch, id]);
 
-  if (!coinData || !coinData.market_data) {
-    return <div>Loading... (If this persists, there might be an issue with the data)</div>;
-  }
+  // Format historical data for CoinPriceChart
+  const formattedHistoricalData = historicalData?.prices.map(([timestamp, price]) => ({
+    date: new Date(timestamp).toISOString(),
+    price: price
+  })) || [];
 
-  const { market_data } = coinData;
+  console.log(formattedHistoricalData);
+
 
   return (
     <div
       draggable
       onDragStart={handleDragStart}
-      className="flex flex-col gap-5 mx-auto border-gray-400">
+      className="flex flex-col gap-5 mx-auto border-gray-400"
+    >
       <div className={`p-2 md:p-3 border-2 ${isDarkMode ? "bg-gray-950 border-gray-600 text-white" : "bg-gray-100 border-gray-400 text-black"} rounded-lg`}>
         <h1 className="text-lg md:text-2xl text-center mb-8 font-semibold uppercase">{id}</h1>
-        {historicalData ? <CoinPriceChart isDarkMode={isDarkMode} coinId={id} historicalData={historicalData} /> : <div>Loading historical data...</div>}
+        {formattedHistoricalData && formattedHistoricalData.length > 0 ? (
+          <CoinPriceChart isDarkMode={isDarkMode} coinId={id} historicalData={formattedHistoricalData} />
+        ) : (
+          <div>Loading historical data...</div>
+        )}
       </div>
       <div className={`p-2 md:p-3 border-2 ${isDarkMode ? "bg-gray-950 border-gray-600 text-white" : "bg-gray-100 border-gray-400 text-black"} rounded-lg`}>
         <h2 className="text-lg md:text-2xl mb-4 text-center font-semibold">Price Change Percentages</h2>
-        <CoinBarChart coinData={coinData} />
+        {coinData ? (
+          <CoinBarChart coinData={coinData} />
+        ) : (
+          <div>Loading...</div>
+        )}
       </div>
 
-      <div className='flex md:flex-row flex-col gap-5 justify-between'>
-        <div className={`w-full md:w-[48%] p-2 md:p-3 border-2 ${isDarkMode ? "bg-gray-950 border-gray-600 text-white" : "bg-gray-100 border-gray-400 text-black"} rounded-lg text-xs md:text-sm`}>
-          <h2 className="text-lg md:text-2xl font-semibold mb-4">Fundamentals</h2>
-          <p className='py-1'><strong>Market Cap:</strong> {market_data.market_cap?.usd?.toLocaleString() ?? 'N/A'}</p>
-          <p className='py-1'><strong>Total Supply:</strong> {market_data.total_supply?.toLocaleString() ?? 'N/A'}</p>
-          <p className='py-1'><strong>Max Supply:</strong> {market_data.max_supply?.toLocaleString() ?? 'N/A'}</p>
-        </div>
-        <div className={`w-full md:w-[48%] p-2 md:p-3 border-2 ${isDarkMode ? "bg-gray-950 border-gray-600 text-white" : "bg-gray-100 border-gray-400 text-black"} rounded-lg text-xs md:text-sm`}>
-          <h2 className="text-lg md:text-2xl font-semibold mb-4">Coin Information</h2>
-          <p className='py-1'><strong>Symbol:</strong> {coinData.symbol}</p>
-          <p className='py-1'><strong>Current Price:</strong> ${market_data?.current_price?.usd?.toLocaleString() ?? 'N/A'}</p>
-          <p className='py-1'><strong>Total Volume:</strong> ${market_data?.total_volume?.usd?.toLocaleString() ?? 'N/A'}</p>
-        </div>
-      </div>
-      <div className={`p-2 md:p-3 border-2 ${isDarkMode ? "bg-gray-950 border-gray-600 text-white" : "bg-gray-100 border-gray-400 text-black"} rounded-lg mb-5`}>
-        <h2 className="text-lg md:text-2xl md:text-left text-center font-semibold mb-4">About {coinData.name}</h2>
-        <p className='text-xs md:text-sm md:text-left text-center' dangerouslySetInnerHTML={{ __html: coinData.description?.en ?? 'No description available.' }} />
-      </div>
+      {coinData && (
+        <>
+          <div className='flex md:flex-row flex-col gap-5 justify-between'>
+            <div className={`w-full md:w-[48%] p-2 md:p-3 border-2 ${isDarkMode ? "bg-gray-950 border-gray-600 text-white" : "bg-gray-100 border-gray-400 text-black"} rounded-lg text-xs md:text-sm`}>
+              <h2 className="text-lg md:text-2xl font-semibold mb-4">Fundamentals</h2>
+              <p className='py-1'><strong>Market Cap:</strong> {coinData.market_data.market_cap.usd}</p>
+              <p className='py-1'><strong>Total Supply:</strong> {coinData.market_data.total_supply}</p>
+              <p className='py-1'><strong>Max Supply:</strong> {coinData.market_data.max_supply}</p>
+            </div>
+            <div className={`w-full md:w-[48%] p-2 md:p-3 border-2 ${isDarkMode ? "bg-gray-950 border-gray-600 text-white" : "bg-gray-100 border-gray-400 text-black"} rounded-lg text-xs md:text-sm`}>
+              <h2 className="text-lg md:text-2xl font-semibold mb-4">Coin Information</h2>
+              <p className='py-1'><strong>Symbol:</strong> {coinData.symbol}</p>
+              <p className='py-1'><strong>Current Price:</strong> {coinData.market_data.current_price.usd}</p>
+              <p className='py-1'><strong>Total Volume:</strong> {coinData.market_data.total_volume.usd}</p>
+            </div>
+          </div>
+          <div className={`p-2 md:p-3 border-2 ${isDarkMode ? "bg-gray-950 border-gray-600 text-white" : "bg-gray-100 border-gray-400 text-black"} rounded-lg mb-5`}>
+            <h2 className="text-lg md:text-2xl md:text-left text-center font-semibold mb-4">About {coinData.name}</h2>
+            <p className='text-xs md:text-sm md:text-left text-center' dangerouslySetInnerHTML={{ __html: coinData.description.en }} />
+          </div>
+        </>
+      )}
     </div>
   );
 };

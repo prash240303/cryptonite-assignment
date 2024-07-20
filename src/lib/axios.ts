@@ -1,6 +1,8 @@
 import axios, { AxiosRequestConfig, AxiosResponse, InternalAxiosRequestConfig, RawAxiosRequestHeaders, AxiosHeaders } from 'axios';
 import { getCachedData, setCachedData } from './cache';
 
+const API_KEY = 'CG-Lr8jUWFFKeHA2kYui3e8Bkhh';
+
 const api = axios.create({
   baseURL: 'https://api.coingecko.com/api/v3',
   headers: {
@@ -20,10 +22,15 @@ api.interceptors.request.use(async (config: InternalAxiosRequestConfig): Promise
         headers: new AxiosHeaders({
           ...config.headers?.toJSON(),
           'X-Cache': 'HIT',
-        })
+        }),
       };
       return Promise.resolve(newConfig);
     }
+    // Append API key to the query parameters
+    if (!config.params) {
+      config.params = {};
+    }
+    config.params.x_cg_demo_api_key = API_KEY;
   }
   return config;
 });
