@@ -1,5 +1,5 @@
 import { configureStore } from '@reduxjs/toolkit';
-import coinsReducer from './slices/coin';
+import coinsReducer from './slices/coins';
 import historicalDataReducer from './slices/historyData';
 import homeReducer from './slices/productPage';
 import watchlistReducer from './slices/watchList';

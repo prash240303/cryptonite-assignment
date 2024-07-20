@@ -2,12 +2,12 @@
 import Link from 'next/link';
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { addToRecentlyViewed, fetchCoinDetails } from '@/redux/slices/coin';
+import { addToRecentlyViewed, fetchCoinDetails } from '@/redux/slices/coins';
 import { AppDispatch, RootState } from '@/redux/store';
-import { CoinTypes, CoinDetails } from '@/redux/slices/types/CoinTypes';
+import { CoinTypes } from '@/redux/slices/types/CoinTypes';
 
 const RecentlyViewed: React.FC = () => {
-  const dispatch: AppDispatch = useDispatch();
+  const dispatch: AppDispatch = useDispatch<AppDispatch>();
   const [showAll, setShowAll] = useState(false);
   const isDarkMode = useSelector((state: RootState) => state.theme.isDarkMode);
   const { recentlyViewed, coinDetails } = useSelector((state: RootState) => state.coins);
@@ -34,28 +34,28 @@ const RecentlyViewed: React.FC = () => {
   return (
     <div>
       <h2 className={`font-semibold text-lg ${isDarkMode ? 'text-white bg-gray-950' : 'text-gray-800'} mb-4`}>Recently Viewed</h2>
-      <table className="min-w-full border border-gray-200">
+      <table className="min-w-full">
         <thead>
           <tr>
-            <th className="py-2 px-4 border-b">Token</th>
-            <th className="py-2 px-4 border-b">Name</th>
-            <th className="py-2 px-4 border-b">Current Price</th>
-            <th className="py-2 px-4 border-b">24h Change</th>
+            <th className="py-2 px-4 ">Token</th>
+            <th className="py-2 px-4 ">Name</th>
+            <th className="py-2 px-4 ">Current Price</th>
+            <th className="py-2 px-4 ">24h Change</th>
           </tr>
         </thead>
         <tbody>
           {displayedCoins.map((coin) => {
-            const currentData = coinDetails[coin.id] as CoinDetails | undefined;
+            const currentData = coinDetails[coin.id] ;
             return (
               <tr key={coin.id}>
-                <td className="py-2 px-4 border-b">{coin.symbol.toUpperCase()}</td>
-                <td className="py-2 px-4 border-b">{coin.name}</td>
-                <td className="py-2 px-4 border-b">
+                <td className="py-2 px-4 ">{coin.symbol.toUpperCase()}</td>
+                <td className="py-2 px-4 ">{coin.name}</td>
+                <td className="py-2 px-4 ">
                   {currentData && currentData.market_data && currentData.market_data.current_price
                     ? `$${currentData.market_data.current_price.usd.toLocaleString()}`
                     : 'Loading...'}
                 </td>
-                <td className="py-2 px-4 border-b">
+                <td className="py-2 px-4 ">
                   {currentData && currentData.market_data && currentData.market_data.price_change_percentage_24h !== undefined
                     ? `${currentData.market_data.price_change_percentage_24h.toFixed(2)}%`
                     : 'Loading...'}

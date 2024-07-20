@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import api from '@/lib/axios';
+import { fetchWithCache } from '@/lib/fetchAPI';
 import { CoinDescription, CoinTypes } from './types/CoinTypes';
 
 interface CoinDetails extends CoinDescription {}
@@ -29,24 +29,30 @@ const initialState: CoinsState = {
 export const fetchCoins = createAsyncThunk<CoinTypes[], number>(
   'coins/fetchCoins',
   async (page) => {
-    const response = await api.get('https://api.coingecko.com/api/v3/coins/markets', {
-      params: {
+    const response = await fetchWithCache<CoinTypes[]>(
+      'coins/markets',
+      {
         vs_currency: 'usd',
         order: 'market_cap_desc',
         per_page: 10,
         page,
         sparkline: false,
       },
-    });
-    return response.data;
+      60000 // Time-to-live for cache in milliseconds (1 minute)
+    );
+    return response;
   }
 );
 
 export const fetchCoinDetails = createAsyncThunk<CoinDetails, string>(
   'coins/fetchCoinDetails',
   async (id) => {
-    const response = await api.get(`https://api.coingecko.com/api/v3/coins/${id}`);
-    return response.data;
+    const response = await fetchWithCache<CoinDetails>(
+      `coins/${id}`,
+      {},
+      60000 // Time-to-live for cache in milliseconds (1 minute)
+    );
+    return response;
   }
 );
 
@@ -69,8 +75,12 @@ export const addToRecentlyViewed = createAsyncThunk<CoinTypes[], CoinTypes, { st
 export const fetchTrendingCoins = createAsyncThunk<CoinTypes[], void>(
   'coins/fetchTrendingCoins',
   async () => {
-    const response = await api.get('https://api.coingecko.com/api/v3/search/trending');
-    return response.data.coins.map((item: { item: CoinTypes }) => item.item);
+    const response = await fetchWithCache<{ coins: { item: CoinTypes }[] }>(
+      'search/trending',
+      {},
+      60000 // Time-to-live for cache in milliseconds (1 minute)
+    );
+    return response.coins.map((item) => item.item);
   }
 );
 

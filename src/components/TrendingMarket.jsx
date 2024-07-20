@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchTrendingCoins } from '../redux/slices/coin';
+import { fetchTrendingCoins } from '../redux/slices/coins';
 import Link from 'next/link';
 
 const TrendingMarket = () => {

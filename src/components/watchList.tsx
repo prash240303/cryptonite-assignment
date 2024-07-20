@@ -5,7 +5,7 @@ import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import Link from 'next/link';
 import { addToWatchlist, setWatchlist } from '@/redux/slices/watchList';
-import { addToRecentlyViewed } from '@/redux/slices/coin';
+import { addToRecentlyViewed } from '@/redux/slices/coins';
 import { AppDispatch, RootState } from '@/redux/store';
 import Image from 'next/image';
 

@@ -1,9 +1,8 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from 'recharts';
 import { TrendingUp } from 'lucide-react';
-import { Bar, BarChart, CartesianGrid, XAxis } from 'recharts';
-
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 
@@ -18,10 +17,11 @@ interface CoinData {
 }
 
 interface CoinBarChartProps {
+  isDarkMode: boolean;
   coinData: CoinData;
 }
 
-const CoinBarChart: React.FC<CoinBarChartProps> = ({ coinData }) => {
+const CoinBarChart: React.FC<CoinBarChartProps> = ({ isDarkMode, coinData }) => {
   const chartData = [
     { period: '24h', change: coinData.market_data.price_change_percentage_24h },
     { period: '7d', change: coinData.market_data.price_change_percentage_7d },
@@ -44,14 +44,16 @@ const CoinBarChart: React.FC<CoinBarChartProps> = ({ coinData }) => {
       <CardContent>
         <ChartContainer config={chartConfig}>
           <BarChart data={chartData}>
-            <CartesianGrid vertical={false} />
+            <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? '#444' : '#ccc'} />
             <XAxis
               dataKey="period"
               tickLine={false}
               tickMargin={10}
               axisLine={false}
               tickFormatter={(value) => value}
+              stroke={isDarkMode ? '#fff' : '#000'}
             />
+            <YAxis stroke={isDarkMode ? '#fff' : '#000'} />
             <ChartTooltip cursor={false} content={<ChartTooltipContent hideLabel />} />
             <Bar dataKey="change" fill="var(--color-change)" radius={8} />
           </BarChart>
