@@ -1,7 +1,7 @@
 import axios, { AxiosRequestConfig, AxiosResponse, InternalAxiosRequestConfig, RawAxiosRequestHeaders, AxiosHeaders } from 'axios';
 import { getCachedData, setCachedData } from './cache';
 
-const API_KEY = 'CG-Lr8jUWFFKeHA2kYui3e8Bkhh';
+const API_KEY = process.env.API_KEY;
 
 const api = axios.create({
   baseURL: 'https://api.coingecko.com/api/v3',
