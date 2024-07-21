@@ -6,8 +6,15 @@ import { fetchCoins } from '@/redux/slices/coinFunctionSlice';
 import { AppDispatch, RootState } from '@/redux/store';
 import { CoinTypes } from '@/redux/slices/types/CoinTypes';
 import Image from 'next/image';
-import { ArrowLeft, ArrowRight } from 'lucide-react';
-import { useTheme } from 'next-themes';
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from '@/components/ui/pagination';
 
 interface ExtendedCoinTypes extends CoinTypes {
   market_cap?: number;
@@ -19,15 +26,11 @@ const ExplorePage: React.FC = () => {
   const dispatch: AppDispatch = useDispatch();
   const { coins, status, error } = useSelector((state: RootState) => state.coins);
   const [page, setPage] = useState<number>(1);
-  const { theme } = useTheme();
+  const totalPages = 100; // Replace with actual total pages
 
   useEffect(() => {
     dispatch(fetchCoins(page));
   }, [dispatch, page]);
-
-  useEffect(() => {
-    console.log('Coins data:', coins); 
-  }, [coins]);
 
   const handleDragStart = (e: DragEvent<HTMLTableRowElement>, coin: ExtendedCoinTypes) => {
     e.dataTransfer.setData('text/plain', JSON.stringify(coin));
@@ -52,40 +55,57 @@ const ExplorePage: React.FC = () => {
   };
 
   if (status === 'loading') {
-    return <div className={`p-3 border-[2px] max-w-6xl mx-auto mt-12 rounded-lg theme-transition ${theme === 'dark' ? "bg-gray-800 border-gray-600" : "bg-gray-100 border-gray-400"}`}>Loading...</div>;
+    return <div className="p-3 border-[2px] max-w-6xl mx-auto mt-12 rounded-lg border-gray-400 bg-gray-100 dark:border-gray-800 dark:bg-neutral-950">Loading...</div>;
   }
 
   if (status === 'failed') {
-    return <div className={`p-3 border-[2px] max-w-6xl mx-auto mt-12 rounded-lg theme-transition ${theme === 'dark' ? "bg-gray-800 border-gray-600" : "bg-gray-100 border-gray-400"}`}>Error: {error}</div>;
+    return <div className="p-3 border-[2px] max-w-6xl mx-auto mt-12 rounded-lg border-gray-400 bg-gray-100 dark:border-gray-600 dark:bg-neutral-950">Error: {error}</div>;
   }
 
+  const getPageNumbers = () => {
+    let pages: (number | string)[] = [];
+    if (totalPages <= 5) {
+      pages = Array.from({ length: totalPages }, (_, index) => index + 1);
+    } else {
+      const start = Math.max(1, page - 2);
+      const end = Math.min(totalPages, page + 2);
+
+      if (start > 1) pages.push(1);
+      if (start > 2) pages.push('...');
+      for (let i = start; i <= end; i++) pages.push(i);
+      if (end < totalPages - 1) pages.push('...');
+      if (end < totalPages) pages.push(totalPages);
+    }
+    return pages;
+  };
+
   return (
-    <div className={`p-3 text-xs max-w-5xl mx-auto mt-12 border-[2px] rounded-lg theme-transition ${theme === 'dark' ? "bg-gray-800 border-gray-600 text-gray-200" : "bg-gray-100 border-gray-400 text-gray-900"}`}>
+    <div className="p-3 text-xs max-w-5xl mx-auto mt-12 border-[2px] rounded-lg border-gray-400 bg-gray-100 text-gray-900 dark:border-gray-600 dark:bg-neutral-950 dark:text-gray-200">
       <h1 className="text-xl font-bold md:text-left text-center mb-4">Explore</h1>
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead>
-            <tr className={`text-gray-500 uppercase leading-normal border-b-[1px] ${theme === 'dark' ? "border-gray-600" : "border-gray-800"}`}>
+            <tr className="text-gray-500 uppercase leading-normal border-b-[1px] border-gray-800 dark:border-gray-600">
               <th className="py-2 px-3 text-left">Token</th>
               <th className="py-2 px-3 text-right">Market Cap</th>
               <th className="py-2 px-3 text-right">Price</th>
               <th className="py-2 px-3 text-right">Today</th>
             </tr>
           </thead>
-          <tbody className={`font-light ${theme === 'dark' ? "text-gray-200" : "text-gray-500"}`}>
+          <tbody className="font-light text-gray-500 dark:text-gray-200">
             {coins && coins.map((coin: ExtendedCoinTypes) => (
-              <tr key={coin.id} draggable onDragStart={(e) => handleDragStart(e, coin)} className={`theme-transition ${theme === 'dark' ? "hover:bg-gray-700" : "hover:bg-gray-200"} cursor-pointer`}>
+              <tr key={coin.id} draggable onDragStart={(e) => handleDragStart(e, coin)} className="cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700">
                 <td className="py-2 px-3 text-left whitespace-nowrap">
                   <Link href={`/coin/${coin.id}`} className="flex items-center group">
                     <Image width={24} height={24} className="w-6 h-6 rounded-full mr-2" src={coin.large || '/placeholder.png'} alt={coin.name} />
-                    <span className={`font-medium ${theme === 'dark' ? "text-blue-400 group-hover:text-blue-300" : "text-blue-600 group-hover:text-blue-500"}`}>
+                    <span className="font-medium text-blue-600 group-hover:text-blue-500 dark:text-blue-400 dark:group-hover:text-blue-300">
                       {coin.symbol?.toUpperCase() || 'N/A'}
                     </span>
                   </Link>
                 </td>
                 <td className="py-2 px-3 text-right">{formatMarketCap(coin.market_cap)}</td>
                 <td className="py-2 px-3 text-right">{formatPrice(coin.current_price)}</td>
-                <td className={`py-2 px-3 text-right ${(coin.price_change_percentage_24h || 0) >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                <td className={`py-2 px-3 text-right ${coin.price_change_percentage_24h && coin.price_change_percentage_24h >= 0 ? 'text-green-500' : 'text-red-500'}`}>
                   {formatPercentage(coin.price_change_percentage_24h)}
                 </td>
               </tr>
@@ -93,22 +113,58 @@ const ExplorePage: React.FC = () => {
           </tbody>
         </table>
       </div>
-      <div className="pt-2 flex justify-between border-t-[1px] ${theme === 'dark' ? "border-gray-600" : "border-gray-800"}">
-        <button
-          onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
-          disabled={page === 1}
-          className={`font-bold py-1 px-2 flex items-center rounded text-xs disabled:text-gray-400 ${theme === 'dark' ? "text-gray-300" : "text-gray-700"}`}
-        >
-          <ArrowLeft className="mr-1" />
-          Previous
-        </button>
-        <button
-          onClick={() => setPage((prev) => prev + 1)}
-          className={`font-bold flex items-center py-1 px-2 rounded text-xs ${theme === 'dark' ? "text-gray-300" : "text-gray-700"}`}
-        >
-          Next
-          <ArrowRight className="ml-1" />
-        </button>
+      <div className="pt-4">
+        <Pagination>
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious
+                href="#"
+                onClick={(e) => {
+                  e.preventDefault();
+                  if (page > 1) {
+                    setPage((prev) => Math.max(prev - 1, 1));
+                  }
+                }}
+                className={page === 1 ? 'cursor-not-allowed opacity-50' : ''}
+              />
+            </PaginationItem>
+            {getPageNumbers().map((pageNumber, index) => (
+              <PaginationItem key={index}>
+                {pageNumber === '...' ? (
+                  <PaginationLink href="#" className="cursor-default">
+                    {pageNumber}
+                  </PaginationLink>
+                ) : (
+                  <PaginationLink
+                    href="#"
+                    isActive={page === pageNumber}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      // Ensure pageNumber is a number before setting it
+                      if (typeof pageNumber === 'number') {
+                        setPage(pageNumber);
+                      }
+                    }}
+                  >
+                    {pageNumber}
+                  </PaginationLink>
+                )}
+              </PaginationItem>
+            ))}
+            <PaginationItem>
+              <PaginationNext
+                href="#"
+                onClick={(e) => {
+                  e.preventDefault();
+                  if (page < totalPages) {
+                    setPage((prev) => Math.min(prev + 1, totalPages));
+                  }
+                }}
+                className={page === totalPages ? 'cursor-not-allowed opacity-50' : ''}
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
       </div>
     </div>
   );
