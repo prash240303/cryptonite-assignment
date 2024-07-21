@@ -1,8 +1,59 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Cryptonite
+
+## Overview
+
+Cryptonite is a modern web application designed for tracking a wide range of cryptocurrencies. Built with Next.js, the app provides real-time updates on cryptocurrency prices and detailed information about individual cryptocurrencies, including historical data and market trends.
+
+## Objectives
+
+- **User-Friendly Interface**: Create an intuitive and easy-to-use web application for tracking cryptocurrencies.
+- **Real-Time Updates**: Implement real-time updates for cryptocurrency prices.
+- **Comprehensive Information**: Offer detailed information about individual cryptocurrencies, including historical data and market trends.
+
+## Features
+
+- **Real-Time Price Tracking**: Monitor current prices and receive real-time updates for various cryptocurrencies.
+- **In-Depth Cryptocurrency Information**: Access detailed information on individual cryptocurrencies, including historical data and market trends.
+- **Graphical Representation**: Visualize market trends with graphs, including market cap trends for major cryptocurrencies.
+- **Watchlist Management**: Manage a personal watchlist with up to 15 cryptocurrencies, utilizing drag-and-drop functionality for easy addition and removal.
+- **Dynamic Routing**: View detailed information about specific coins through dynamic routing based on coin IDs.
+- **Caching and Performance**: Cache API responses on the client side with an expiry time to enhance performance.
+- **Error Handling and Notifications**: Receive error Messages for errors encountered during data fetching.
+
+## Pages and Features
+
+### Market Overview
+
+- **Market Cap Graph**: Displays the market cap of Bitcoin, Ethereum, and Litecoin over the past year.
+- **Company Holdings**: Provides information about companies holding Bitcoin and Ethereum.
+- **Recently Viewed**: Shows recently viewed cryptocurrencies for easy access.
+
+### Trending Section
+
+- **Trending Coins**: Displays information about currently trending coins.
+- **Watchlist Drag and Drop**: Allows users to drag and drop coins from the trending section into their watchlist for future reference.
+
+### Explore Page
+
+- **Paginated View**: Provides details of top coins with pagination (20 coins per page).
+
+### Custom Coin Page
+
+- **Dynamic Routing**: Shows details of a specific coin based on the coin ID from the URL parameter.
+- **Line Chart**: Illustrates the price variation of the coin over the past year.
+- **Fundamental Information**: Offers key details and a description of the coin.
+
+## Technical Details
+
+- **Tech Stack**: Utilizes Next.js for server-side rendering and routing, and Tailwind CSS for styling.
+- **Caching**: Implements client-side caching with expiry time for API responses.
+- **Rate Limiting**: Includes API request rate limiting to manage traffic and prevent abuse.
+- **UI Design**: Employs ShadCN UI components for a better UI experience and easy application of dark mode themes.
+- **Dark Mode**: Features a dark mode theme for improved user experience.
 
 ## Getting Started
 
-First, run the development server:
+To start the development server, run:
 
 ```bash
 npm run dev
@@ -12,25 +63,3 @@ yarn dev
 pnpm dev
 # or
 bun dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
