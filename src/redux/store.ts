@@ -3,7 +3,7 @@ import coinsReducer from './slices/coinFunctionSlice';
 import historicalDataReducer from './slices/historyDataSlice';
 import homeReducer from './slices/homePageSlice';
 import watchlistReducer from './slices/watchListSlice';
-import themeReducer, { setTheme } from './slices/themeSlice'
+import themeReducer from './slices/themeSlice'
 
 const Store = configureStore({
   reducer: {

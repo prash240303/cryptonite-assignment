@@ -68,12 +68,11 @@
   }
 }
 
-/* In your global CSS file or a CSS module */
 .description-content a {
-  color: #007bff; /* Change to your desired highlight color */
+  color: #007bff; 
   text-decoration: underline;
 }
 
 .description-content a:hover {
-  color: #0056b3; /* Change to your desired hover color */
+  color: #0056b3; 
 }

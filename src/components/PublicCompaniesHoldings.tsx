@@ -1,7 +1,6 @@
 "use client"
 
 import React from 'react';
-import { useTheme } from 'next-themes';
 
 interface PublicCompaniesHoldingsProps {
   companies: {
@@ -12,7 +11,6 @@ interface PublicCompaniesHoldingsProps {
 }
 
 const PublicCompaniesHoldings = ({ companies }: PublicCompaniesHoldingsProps) => {
-  const { theme } = useTheme();
 
   return (
     <div className="p-3 border-2 rounded-lg border-input bg-background">

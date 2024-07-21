@@ -1,13 +1,15 @@
+// @/redux/slices/coinFunctionSlice.ts
+
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { fetchWithCache } from '@/lib/fetchAPI';
-import { CoinDescription, CoinTypes } from './types/CoinTypes';
+import { CoinDescription, CoinTypes, RecentlyViewedCoin } from './types/CoinTypes';
 
 interface CoinDetails extends CoinDescription {}
 
 interface CoinsState {
   coins: CoinTypes[];
   coinDetails: Record<string, CoinDetails>;
-  recentlyViewed: CoinTypes[];
+  recentlyViewed: RecentlyViewedCoin[];
   status: 'idle' | 'loading' | 'succeeded' | 'failed';
   error: string | null;
   trendingCoins: CoinTypes[];
@@ -56,7 +58,7 @@ export const fetchCoinDetails = createAsyncThunk<CoinDetails, string>(
   }
 );
 
-export const addToRecentlyViewed = createAsyncThunk<CoinTypes[], CoinTypes, { state: { coins: CoinsState } }>(
+export const addToRecentlyViewed = createAsyncThunk<RecentlyViewedCoin[], RecentlyViewedCoin, { state: { coins: CoinsState } }>(
   'coins/addToRecentlyViewed',
   async (coin, { getState }) => {
     const { coins } = getState();
@@ -112,7 +114,7 @@ const CoinsLogic = createSlice({
         state.status = 'failed';
         state.error = action.error.message || null;
       })
-      .addCase(addToRecentlyViewed.fulfilled, (state, action: PayloadAction<CoinTypes[]>) => {
+      .addCase(addToRecentlyViewed.fulfilled, (state, action: PayloadAction<RecentlyViewedCoin[]>) => {
         state.recentlyViewed = action.payload;
       })
       .addCase(fetchTrendingCoins.pending, (state) => {

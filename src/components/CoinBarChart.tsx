@@ -1,15 +1,15 @@
 'use client';
 
-import React, { useEffect, useRef } from 'react';
+import React from 'react';
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from 'recharts';
 import { TrendingUp } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 
 interface MarketData {
-  price_change_percentage_24h: number;
-  price_change_percentage_7d: number;
-  price_change_percentage_30d: number;
+  price_change_percentage_24h?: number;
+  price_change_percentage_7d?: number; // Make this optional
+  price_change_percentage_30d?: number;
 }
 
 interface CoinData {
@@ -24,7 +24,7 @@ interface CoinBarChartProps {
 const CoinBarChart: React.FC<CoinBarChartProps> = ({ isDarkMode, coinData }) => {
   const chartData = [
     { period: '24h', change: coinData.market_data.price_change_percentage_24h },
-    { period: '7d', change: coinData.market_data.price_change_percentage_7d },
+    { period: '7d', change: coinData.market_data.price_change_percentage_7d ?? 0 }, // Default to 0 if undefined
     { period: '30d', change: coinData.market_data.price_change_percentage_30d },
   ];
 

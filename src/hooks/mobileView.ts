@@ -1,6 +1,7 @@
+'use client';
 import { useState, useEffect } from 'react';
 
-const mobileVeiw = (breakpoint = 768) => {
+const MobileView = (breakpoint = 768) => {
   const [isSmallScreen, setIsSmallScreen] = useState(false);
 
   useEffect(() => {
@@ -17,4 +18,4 @@ const mobileVeiw = (breakpoint = 768) => {
   return isSmallScreen;
 };
 
-export default mobileVeiw;
+export default MobileView;

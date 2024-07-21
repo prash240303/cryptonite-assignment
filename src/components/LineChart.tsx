@@ -15,7 +15,7 @@ interface CoinData {
 
 type TimeRange = '24h' | '7d' | '30d';
 
-const LineChart: React.FC = () => {
+const LineChart=() => {
   const dispatch = useDispatch<AppDispatch>();
   const { theme } = useTheme();
   const { data, status, error } = useSelector((state: RootState) => state.historicalData);
@@ -164,7 +164,7 @@ const LineChart: React.FC = () => {
             onClick={() => handleTimeRangeChange(range as TimeRange)}
             className={`py-1 px-2 rounded-md transition-colors duration-200 ${
               timeRange === range
-                ? 'bg-green-500 text-white'
+                ? 'bg-green-600 text-white'
                 : 'bg-gray-300 dark:bg-gray-800 text-gray-900 dark:text-white hover:bg-gray-400 dark:hover:bg-gray-700'
             }`}
           >

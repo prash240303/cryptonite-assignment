@@ -8,6 +8,7 @@ import { addToWatchlist, setWatchlist } from '@/redux/slices/watchListSlice';
 import { addToRecentlyViewed } from '@/redux/slices/coinFunctionSlice';
 import { AppDispatch, RootState } from '@/redux/store';
 import Image from 'next/image';
+import { RecentlyViewedCoin } from '@/redux/slices/types/CoinTypes';
 
 interface WatchlistCoin {
   coin_id: number;
@@ -54,7 +55,12 @@ const WatchList: React.FC = () => {
       coinData.data?.market_cap
     ) {
       dispatch(addToWatchlist(coinData));
-      dispatch(addToRecentlyViewed(coinData));
+      const recentlyViewedCoin: RecentlyViewedCoin = {
+        ...coinData,
+        image: '', // Provide a valid image URL here
+        genesis_date: '', // Provide a valid genesis date here
+      };
+      dispatch(addToRecentlyViewed(recentlyViewedCoin));
       const newWatchlist = [...watchlist, coinData];
       localStorage.setItem('watchlist', JSON.stringify(newWatchlist));
 

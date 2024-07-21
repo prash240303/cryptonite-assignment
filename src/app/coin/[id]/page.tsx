@@ -8,11 +8,10 @@ import { fetchHistoricalData } from '@/redux/slices/historyDataSlice';
 import CoinPriceChart from '@/components/CoinPriceChart';
 import CoinBarChart from '@/components/CoinBarChart';
 import { AppDispatch, RootState } from '@/redux/store';
-import { HistoricalData } from '@/redux/slices/types/CoinTypes';
+import { HistoricalData, CoinTypes, CoinDetailsPayload, RecentlyViewedCoin } from '@/redux/slices/types/CoinTypes';
 import Image from 'next/image';
 import LivePriceService from '@/services/LivePrice';
 import PubSub from '@/services/PubSub';
-import mobileVeiw from '@/hooks/mobileVeiw';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -31,20 +30,19 @@ const kMB = (value: number): string => {
   }
 };
 
-const formatValue = (value: number, isSmallScreen: boolean): string => {
+const formatValue = (value: number): string => {
   if (value === undefined || value === null) return 'N/A';
   const numValue = Number(value);
-  return isSmallScreen ? kMB(numValue) : numValue.toLocaleString();
+  return numValue.toLocaleString();
 };
 
-const LivePriceDisplay: React.FC<{ price: number, isSmallScreen: boolean }> = React.memo(({ price, isSmallScreen }) => (
+const LivePriceDisplay: React.FC<{ price: number }> = React.memo(({ price }) => (
   <div className='flex gap-2 items-center'>
     <Badge variant="secondary" className="animate-pulse">Live</Badge>
     <p className='font-semibold md:text-lg'>${price.toLocaleString()}</p>
   </div>
 ));
 LivePriceDisplay.displayName = 'LivePriceDisplay';
-
 const CoinPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const dispatch = useDispatch<AppDispatch>();
@@ -52,7 +50,6 @@ const CoinPage: React.FC = () => {
   const { theme } = useTheme();
   const coinData = useSelector((state: RootState) => state.coins.coinDetails[id]);
   const historicalData = useSelector((state: RootState) => state.historicalData.data.find((data) => data.name === id)) as HistoricalData | undefined;
-  const isSmallerMobileView = mobileVeiw();
 
   const livePriceRef = useRef<number | null>(null);
 
@@ -71,28 +68,29 @@ const CoinPage: React.FC = () => {
     }
   }, [coinData]);
 
-
   useEffect(() => {
     let unsubscribe: () => void;
 
     if (id) {
       dispatch(fetchCoinDetails(id)).then((action) => {
-        if (action.payload) {
-          const coinForRecentlyViewed = {
-            id: action.payload.id,
-            name: action.payload.name,
-            symbol: action.payload.symbol,
-            image: action.payload.image.thumb,
-            market_cap_rank: action.payload.market_cap_rank,
-            genesis_date: action.payload.genesis_date,
+        const payload = action.payload as CoinDetailsPayload;
+
+        if (payload) {
+          const coinForRecentlyViewed: RecentlyViewedCoin = {
+            id: payload.id,
+            name: payload.name,
+            symbol: payload.symbol,
+            image: payload.image.thumb,
+            market_cap_rank: payload.market_cap_rank,
+            genesis_date: payload.genesis_date,
           };
           dispatch(addToRecentlyViewed(coinForRecentlyViewed));
 
-          const initialPrice = action.payload.market_data.current_price.usd;
+          const initialPrice = payload.market_data.current_price.usd;
           setLivePrice(initialPrice);
           livePriceRef.current = initialPrice;
 
-          LivePriceService.startUpdates(id, initialPrice);
+          LivePriceService().startUpdates(id, initialPrice);
           unsubscribe = PubSub.subscribe('priceUpdate', ({ coinId, price }) => {
             if (coinId === id) {
               livePriceRef.current = price;
@@ -101,12 +99,12 @@ const CoinPage: React.FC = () => {
           });
         }
       });
-      dispatch(fetchHistoricalData(id));
+      dispatch(fetchHistoricalData());
     }
 
     return () => {
       if (unsubscribe) unsubscribe();
-      if (id) LivePriceService.stopUpdates(id);
+      if (id) LivePriceService().stopUpdates(id);
     };
   }, [dispatch, id]);
 
@@ -118,7 +116,7 @@ const CoinPage: React.FC = () => {
 
   const displayedPrice = livePrice || (coinData && coinData.market_data.current_price.usd);
 
-  const variant = coinData?.market_data?.price_change_percentage_24h >= 0 ? "success" : "default";
+  const variant = coinData?.market_data?.price_change_percentage_24h >= 0 ? "secondary" : "default"; // Update here
   return (
     <div className="flex flex-col gap-8 max-w-6xl mt-12 mx-auto p-4">
       <Card>
@@ -143,7 +141,7 @@ const CoinPage: React.FC = () => {
               </div>
             </div>
             {displayedPrice !== undefined && (
-              <LivePriceDisplay price={displayedPrice} isSmallScreen={isSmallerMobileView} />
+              <LivePriceDisplay price={displayedPrice} />
             )}
           </div>
         </CardHeader>
@@ -151,20 +149,20 @@ const CoinPage: React.FC = () => {
           {coinData && (
             <div className='mt-4 flex flex-col gap-4'>
               <div className='flex justify-between text-sm'>
-                <p><strong>Market Cap:</strong> ${formatValue(coinData.market_data.market_cap.usd, isSmallerMobileView)}</p>
+                <p><strong>Market Cap:</strong> ${formatValue(coinData.market_data.market_cap.usd)}</p>
                 <Badge variant={variant}>
                   {coinData.market_data.price_change_percentage_24h >= 0 ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
                   {(coinData.market_data.price_change_percentage_24h).toFixed(2)}%
                 </Badge>
               </div>
               <div className='flex justify-between text-sm'>
-                <p><strong>Max Supply:</strong> ${formatValue(coinData.market_data.max_supply || 0, isSmallerMobileView)}</p>
-                <p><strong>Total Volume:</strong> ${formatValue(coinData.market_data.total_volume.usd, isSmallerMobileView)}</p>
+                <p><strong>Max Supply:</strong> ${formatValue(coinData.market_data.max_supply || 0)}</p>
+                <p><strong>Total Volume:</strong> ${formatValue(coinData.market_data.total_volume.usd)}</p>
               </div>
             </div>
           )}
           {historicalData ? (
-            <CoinPriceChart  coinId={id} historicalData={formattedHistoricalData} />
+            <CoinPriceChart coinId={id} historicalData={formattedHistoricalData} />
           ) : (
             <div className="text-center text-muted-foreground">Loading...</div>
           )}
@@ -207,5 +205,6 @@ const CoinPage: React.FC = () => {
     </div>
   );
 };
+
 
 export default CoinPage;

@@ -17,7 +17,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
-const HomeContent: React.FC = () => {
+const HomeContent = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { publicCompaniesHoldings } = useSelector((state: RootState) => state.home);
   const { setIsLoading } = useLoading();
@@ -94,7 +94,7 @@ const HomeContent: React.FC = () => {
 
           <Card className="mt-6">
             <CardHeader>
-              <CardTitle>Recently Viewed</CardTitle>
+              <CardTitle className='font-semibold text-lg'>Recently Viewed</CardTitle>
             </CardHeader>
             <CardContent>
               <RecentlyViewed />

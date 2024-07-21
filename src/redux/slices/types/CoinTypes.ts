@@ -61,7 +61,25 @@ export interface HistoricalData {
 }
 
 
-// @/redux/slices/types/CoinTypes.ts
+
+export interface CoinDetailsPayload {
+  id: string;
+  name: string;
+  symbol: string;
+  image: { thumb: string };
+  market_cap_rank: number;
+  genesis_date: string;
+  market_data: {
+    current_price: { usd: number };
+    price_change_percentage_24h: number;
+    market_cap: { usd: number };
+    max_supply: number;
+    total_volume: { usd: number };
+  };
+  description: { en: string };
+}
+
+
 export interface RecentlyViewedCoin {
   id: string;
   name: string;
@@ -69,5 +87,12 @@ export interface RecentlyViewedCoin {
   image: string;
   market_cap_rank: number;
   genesis_date: string | null;
+}
+export interface CoinData {
+  market_data: {
+    price_change_percentage_24h: number;
+    price_change_percentage_7d: number;
+    price_change_percentage_30d: number;
+  };
 }
 

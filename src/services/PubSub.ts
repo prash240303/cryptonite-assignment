@@ -26,4 +26,6 @@ class PubSub {
   }
 }
 
-export default new PubSub();
+const pubSubInstance = new PubSub();
+
+export default pubSubInstance;

@@ -9,13 +9,13 @@ import { useTheme } from 'next-themes';
 Chart.register(LineController, LineElement, PointElement, LinearScale, TimeScale, Title, Tooltip, Legend, CategoryScale);
 
 interface HistoricalData {
-  date: string;
+  date: Date;
   price: number;
 }
 
 interface CoinPriceChartProps {
   coinId: string;
-  historicalData: { date: string; price: number; }[] | undefined;
+  historicalData: HistoricalData[] | undefined;
 }
 
 

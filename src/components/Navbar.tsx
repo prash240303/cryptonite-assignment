@@ -68,33 +68,38 @@ const Navbar = () => {
         <Image className='h-8 w-8 md:h-10 md:w-10 rounded-full' height={1000} width={1000} src={"/logo.jpg"} alt="Logo" />
         Cryptonite
       </Link>
-      <div className="relative flex items-center w-[12rem] md:w-[30.5rem] gap-1 pl-2 py-1 border-[1px] border-input bg-background rounded-md">
-        <span className="text-muted-foreground">
-          <Search />
-        </span>
-        <input
-          className="outline-none rounded-r-md p-1.5 w-full text-xs md:text-sm placeholder:text-xs md:placeholder:text-sm bg-background text-foreground"
-          placeholder='Search...'
-          value={searchTerm}
-          onChange={handleSearchChange}
-          onKeyPress={handleKeyPress}
-        />
-        {showDropdown && (
-          <div className="absolute text-xs top-full left-0 w-full mt-1 bg-background border border-input rounded-md shadow-lg z-10">
-            {searchResults.map((coin) => (
-              <div
-                key={coin.id}
-                className="p-2 cursor-pointer font-semibold flex items-center hover:bg-accent"
-                onClick={() => handleCoinSelect(coin.id)}
-              >
-                <Image src={coin.thumb} alt={coin.name} width={100} height={100} className="w-6 h-6 mr-2" />
-                <span>{coin.name} ({coin.symbol})</span>
-              </div>
-            ))}
-          </div>
-        )}
+      <div className="flex items-center gap-4">
+        <div className="relative flex items-center w-[12rem] md:w-[30.5rem] gap-1 pl-2 py-1 border-[1px] border-input bg-background rounded-md">
+          <span className="text-muted-foreground">
+            <Search />
+          </span>
+          <input
+            className="outline-none rounded-r-md p-1.5 w-full text-xs md:text-sm placeholder:text-xs md:placeholder:text-sm bg-background text-foreground"
+            placeholder='Search...'
+            value={searchTerm}
+            onChange={handleSearchChange}
+            onKeyPress={handleKeyPress}
+          />
+          {showDropdown && (
+            <div className="absolute text-xs top-full left-0 w-full mt-1 bg-background border border-input rounded-md shadow-lg z-10">
+              {searchResults.map((coin) => (
+                <div
+                  key={coin.id}
+                  className="p-2 cursor-pointer font-semibold flex items-center hover:bg-accent"
+                  onClick={() => handleCoinSelect(coin.id)}
+                >
+                  <Image src={coin.thumb} alt={coin.name} width={100} height={100} className="w-6 h-6 mr-2" />
+                  <span>{coin.name} ({coin.symbol})</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+        <Link href="/explore" className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors">
+          Explore
+        </Link>
+        <ThemeToggle />
       </div>
-      <ThemeToggle />
     </nav>
   );
 };
