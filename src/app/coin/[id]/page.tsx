@@ -3,11 +3,11 @@
 import React, { useEffect, useState, useMemo, useCallback, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'next/navigation';
-import { fetchCoinDetails, addToRecentlyViewed } from '@/redux/slices/coins';
-import { fetchHistoricalData } from '@/redux/slices/historyData';
+import { fetchCoinDetails, addToRecentlyViewed } from '@/redux/slices/coinFunctionSlice';
+import { fetchHistoricalData } from '@/redux/slices/historyDataSlice';
 import CoinPriceChart from '@/components/CoinPriceChart';
 import CoinBarChart from '@/components/CoinBarChart';
-import { RootState } from '@/redux/store';
+import { AppDispatch, RootState } from '@/redux/store';
 import { HistoricalData } from '@/redux/slices/types/CoinTypes';
 import Image from 'next/image';
 import LivePriceService from '@/services/LivePrice';
@@ -17,7 +17,7 @@ import { ChevronDown, ChevronUp } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { toggleTheme } from '@/redux/slices/theme';
+import { useTheme } from "next-themes";
 
 const kMB = (value: number): string => {
   if (value >= 1000000000) {
@@ -43,14 +43,13 @@ const LivePriceDisplay: React.FC<{ price: number, isSmallScreen: boolean }> = Re
     <p className='font-semibold md:text-lg'>${price.toLocaleString()}</p>
   </div>
 ));
-
 LivePriceDisplay.displayName = 'LivePriceDisplay';
 
 const CoinPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
   const [livePrice, setLivePrice] = useState<number | null>(null);
-  const isDarkMode = useSelector((state: RootState) => state.theme.isDarkMode);
+  const { theme } = useTheme();
   const coinData = useSelector((state: RootState) => state.coins.coinDetails[id]);
   const historicalData = useSelector((state: RootState) => state.historicalData.data.find((data) => data.name === id)) as HistoricalData | undefined;
   const isSmallerMobileView = mobileVeiw();
@@ -72,14 +71,6 @@ const CoinPage: React.FC = () => {
     }
   }, [coinData]);
 
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const savedTheme = localStorage.getItem('isDarkMode');
-      if (savedTheme !== null) {
-        dispatch(toggleTheme(JSON.parse(savedTheme)));
-      }
-    }
-  }, [dispatch]);
 
   useEffect(() => {
     let unsubscribe: () => void;
@@ -127,8 +118,9 @@ const CoinPage: React.FC = () => {
 
   const displayedPrice = livePrice || (coinData && coinData.market_data.current_price.usd);
 
+  const variant = coinData?.market_data?.price_change_percentage_24h >= 0 ? "success" : "default";
   return (
-    <div className={`flex flex-col gap-8 max-w-6xl mt-12 mx-auto p-4 ${isDarkMode ? 'dark' : ''}`}>
+    <div className="flex flex-col gap-8 max-w-6xl mt-12 mx-auto p-4">
       <Card>
         <CardHeader>
           <div className='flex flex-col md:flex-row justify-between items-center gap-4'>
@@ -137,12 +129,12 @@ const CoinPage: React.FC = () => {
               onDragStart={handleDragStart}
               className='flex gap-4 items-center'>
               {coinData?.image?.thumb && (
-                <Image 
-                  className='h-12 w-12 rounded-full object-cover' 
-                  height={48} 
-                  width={48} 
-                  src={coinData?.image?.thumb} 
-                  alt={coinData?.name} 
+                <Image
+                  className='h-12 w-12 rounded-full object-cover'
+                  height={48}
+                  width={48}
+                  src={coinData?.image?.thumb}
+                  alt={coinData?.name}
                 />
               )}
               <div className='flex flex-col items-start'>
@@ -160,7 +152,7 @@ const CoinPage: React.FC = () => {
             <div className='mt-4 flex flex-col gap-4'>
               <div className='flex justify-between text-sm'>
                 <p><strong>Market Cap:</strong> ${formatValue(coinData.market_data.market_cap.usd, isSmallerMobileView)}</p>
-                <Badge variant={coinData.market_data.price_change_percentage_24h >= 0 ? "success" : "destructive"}>
+                <Badge variant={variant}>
                   {coinData.market_data.price_change_percentage_24h >= 0 ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
                   {(coinData.market_data.price_change_percentage_24h).toFixed(2)}%
                 </Badge>
@@ -172,7 +164,7 @@ const CoinPage: React.FC = () => {
             </div>
           )}
           {historicalData ? (
-            <CoinPriceChart isDarkMode={isDarkMode} coinId={id} historicalData={formattedHistoricalData} />
+            <CoinPriceChart  coinId={id} historicalData={formattedHistoricalData} />
           ) : (
             <div className="text-center text-muted-foreground">Loading...</div>
           )}
@@ -182,7 +174,7 @@ const CoinPage: React.FC = () => {
       <Tabs defaultValue="price-changes" className="w-full">
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="price-changes">Price Changes</TabsTrigger>
-          <TabsTrigger value="description" >Description</TabsTrigger>
+          <TabsTrigger value="description">Description</TabsTrigger>
         </TabsList>
         <TabsContent value="price-changes">
           <Card>
@@ -191,7 +183,7 @@ const CoinPage: React.FC = () => {
             </CardHeader>
             <CardContent>
               {coinData ? (
-                <CoinBarChart isDarkMode={isDarkMode} coinData={coinData} />
+                <CoinBarChart isDarkMode={theme === 'dark'} coinData={coinData} />
               ) : (
                 <div className="text-center text-muted-foreground">Loading...</div>
               )}

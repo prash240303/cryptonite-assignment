@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Chart, LineController, LineElement, PointElement, LinearScale, TimeScale, Title, Tooltip, Legend, CategoryScale } from 'chart.js';
 import 'chartjs-adapter-date-fns';
 import { enUS } from 'date-fns/locale';
+import { useTheme } from 'next-themes';
 
 Chart.register(LineController, LineElement, PointElement, LinearScale, TimeScale, Title, Tooltip, Legend, CategoryScale);
 
@@ -13,15 +14,18 @@ interface HistoricalData {
 }
 
 interface CoinPriceChartProps {
-  isDarkMode: boolean;
   coinId: string;
   historicalData: { date: string; price: number; }[] | undefined;
 }
 
-const CoinPriceChart: React.FC<CoinPriceChartProps> = ({ isDarkMode, coinId, historicalData }) => {
+
+const CoinPriceChart: React.FC<CoinPriceChartProps> = ({ coinId, historicalData }) => {
   const chartRef = useRef<HTMLCanvasElement>(null);
   const [timeRange, setTimeRange] = useState<string>('24h');
   const chartInstanceRef = useRef<Chart | null>(null);
+  const { theme } = useTheme();
+
+
   const filterDataByTimeRange = (data: HistoricalData[], range: string): HistoricalData[] => {
     const now = new Date();
     const pastDate = new Date();
@@ -85,26 +89,40 @@ const CoinPriceChart: React.FC<CoinPriceChartProps> = ({ isDarkMode, coinId, his
                   },
                   title: {
                     display: true,
-                    text: 'Date'
+                    text: 'Date',
+                    color: theme === 'dark' ? '#fff' : '#000'
+                  },
+                  ticks: {
+                    color: theme === 'dark' ? '#fff' : '#000'
                   }
                 },
                 y: {
                   beginAtZero: false,
                   title: {
                     display: true,
-                    text: 'Price (USD)'
+                    text: 'Price (USD)',
+                    color: theme === 'dark' ? '#fff' : '#000'
+                  },
+                  ticks: {
+                    color: theme === 'dark' ? '#fff' : '#000'
                   }
                 }
               },
               plugins: {
                 title: {
                   display: true,
-                  text: `${coinId.toUpperCase()} Price - ${timeRange}`
+                  text: `${coinId.toUpperCase()} Price - ${timeRange}`,
+                  color: theme === 'dark' ? '#fff' : '#000'
                 },
                 tooltip: {
                   mode: 'index',
                   intersect: false,
                   position: 'nearest'
+                },
+                legend: {
+                  labels: {
+                    color: theme === 'dark' ? '#fff' : '#000'
+                  }
                 }
               }
             }
@@ -121,7 +139,7 @@ const CoinPriceChart: React.FC<CoinPriceChartProps> = ({ isDarkMode, coinId, his
         chartInstanceRef.current = null;
       }
     };
-  }, [historicalData, timeRange, coinId]);
+  }, [historicalData, timeRange, coinId, theme]);
 
   const handleTimeRangeChange = (range: string) => {
     setTimeRange(range);
@@ -130,10 +148,10 @@ const CoinPriceChart: React.FC<CoinPriceChartProps> = ({ isDarkMode, coinId, his
   return (
     <div className='w-full'>
       <canvas ref={chartRef} />
-      <div className={`${isDarkMode ? "text-white" : "text-black"} flex justify-center gap-2 text-xs py-2`}>
-        <button onClick={() => handleTimeRangeChange('24h')} className={`${isDarkMode ? "bg-gray-800" : "bg-gray-300"} py-1 px-2 rounded-md`}>24h</button>
-        <button onClick={() => handleTimeRangeChange('7d')} className={`${isDarkMode ? "bg-gray-800" : "bg-gray-300"} py-1 px-2 rounded-md`}>7d</button>
-        <button onClick={() => handleTimeRangeChange('30d')} className={`${isDarkMode ? "bg-gray-800" : "bg-gray-300"} py-1 px-2 rounded-md`}>30d</button>
+      <div className="flex justify-center gap-2 text-xs py-2">
+        <button onClick={() => handleTimeRangeChange('24h')} className="py-1 px-2 rounded-md bg-primary text-primary-foreground">24h</button>
+        <button onClick={() => handleTimeRangeChange('7d')} className="py-1 px-2 rounded-md bg-primary text-primary-foreground">7d</button>
+        <button onClick={() => handleTimeRangeChange('30d')} className="py-1 px-2 rounded-md bg-primary text-primary-foreground">30d</button>
       </div>
     </div>
   );

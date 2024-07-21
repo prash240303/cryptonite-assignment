@@ -1,9 +1,9 @@
 import { configureStore } from '@reduxjs/toolkit';
-import coinsReducer from './slices/coins';
-import historicalDataReducer from './slices/historyData';
-import homeReducer from './slices/productPage';
-import watchlistReducer from './slices/watchList';
-import themeReducer, { setTheme } from './slices/theme'
+import coinsReducer from './slices/coinFunctionSlice';
+import historicalDataReducer from './slices/historyDataSlice';
+import homeReducer from './slices/homePageSlice';
+import watchlistReducer from './slices/watchListSlice';
+import themeReducer, { setTheme } from './slices/themeSlice'
 
 const Store = configureStore({
   reducer: {

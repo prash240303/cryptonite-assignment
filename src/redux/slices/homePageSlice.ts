@@ -66,7 +66,7 @@ export const fetchPublicCompaniesHoldings = createAsyncThunk<CompanyHolding[], v
   }
 );
 
-const productPageSlice = createSlice({
+const homePageSlice = createSlice({
   name: 'home',
   initialState,
   reducers: {},
@@ -97,4 +97,4 @@ const productPageSlice = createSlice({
   }
 });
 
-export default productPageSlice.reducer;
+export default homePageSlice.reducer;

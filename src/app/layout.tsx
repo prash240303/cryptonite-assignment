@@ -2,8 +2,9 @@ import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
 import { ProviderWrapper } from '@/redux/providerWrapper';
+import { ThemeProvider } from '@/components/ThemeProvider';
+import { LoadingProvider } from '@/components/LoadingProvider';
 import Navbar from '@/components/Navbar';
-import LayoutProvider from '@/components/ThemeProvider';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -18,12 +19,15 @@ interface RootLayoutProps {
 
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body className={`min-h-screen bg-background antialiased ${inter.className}`}>
         <ProviderWrapper>
-          <LayoutProvider>
-            {children}
-          </LayoutProvider>
+          <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+            <LoadingProvider>
+              <Navbar />
+              {children}
+            </LoadingProvider>
+          </ThemeProvider>
         </ProviderWrapper>
       </body>
     </html>

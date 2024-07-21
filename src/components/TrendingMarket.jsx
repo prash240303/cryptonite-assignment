@@ -2,12 +2,14 @@
 
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchTrendingCoins } from '../redux/slices/coins';
+import { fetchTrendingCoins } from '../redux/slices/coinFunctionSlice';
 import Link from 'next/link';
+import { useTheme } from 'next-themes';
+import Image from 'next/image';
 
 const TrendingMarket = () => {
   const dispatch = useDispatch();
-  const isDarkMode = useSelector((state) => state.theme.isDarkMode)
+  const { theme } = useTheme();
   const { trendingCoins, trendingStatus, trendingError } = useSelector((state) => state.coins);
   const [showAll, setShowAll] = useState(false);
 
@@ -22,7 +24,7 @@ const TrendingMarket = () => {
   }, [trendingStatus, dispatch]);
 
   if (trendingStatus === 'loading') {
-    return <div className="text-white">Loading trending coins...</div>;
+    return <div className="text-gray-900 dark:text-white">Loading trending coins...</div>;
   }
 
   if (trendingStatus === 'failed') {
@@ -46,8 +48,7 @@ const TrendingMarket = () => {
   const displayedCoins = showAll ? trendingCoins : trendingCoins.slice(0, 5);
   
   return (
-    <div className={`p-3 text-xs ${isDarkMode?"text-white border-gray-600 bg-gray-950":"text-black bg-gray-100 border-gray-400"} border-[2px] rounded-lg `}>
-      <h1 className="text-lg md:text-xl font-bold mb-4 text-center md:text-left">Trending</h1>
+    <div className="p-3 text-xs text-gray-900 dark:text-white dark:bg-black  border-[2px] rounded-lg">
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead>
@@ -59,12 +60,12 @@ const TrendingMarket = () => {
               <th className="py-2 px-3 text-right">Market Cap</th>
             </tr>
           </thead>
-          <tbody className="text-gray-500 font-light">
+          <tbody className="text-gray-500 dark:text-gray-400 font-light">
             {displayedCoins.map((coin) => (
-              <tr key={coin.id} draggable onDragStart={(e) => handleDragStart(e, coin)} className={`${isDarkMode?"hover:bg-gray-900":"hover:bg-gray-200"} cursor-pointer`}>
+              <tr key={coin.id} draggable onDragStart={(e) => handleDragStart(e, coin)} className="hover:bg-gray-200 dark:hover:bg-gray-900 cursor-pointer">
                 <td className="py-2 px-3 text-left whitespace-nowrap">
                   <Link href={`/coin/${coin.id}`} className="flex items-center group">
-                    <img className="w-6 h-6 rounded-full mr-2" src={coin.large} alt={coin.name} />
+                    <Image width={100} height={100} className="w-6 h-6 rounded-full mr-2" src={coin.large} alt={coin.name} />
                     <span className="font-medium text-blue-400 group-hover:text-blue-300">
                       {coin.symbol.toUpperCase()}
                     </span>

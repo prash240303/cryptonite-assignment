@@ -1,15 +1,18 @@
 'use client';
+
 import Link from 'next/link';
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { addToRecentlyViewed, fetchCoinDetails } from '@/redux/slices/coins';
+import { addToRecentlyViewed, fetchCoinDetails } from '@/redux/slices/coinFunctionSlice';
 import { AppDispatch, RootState } from '@/redux/store';
 import { CoinTypes } from '@/redux/slices/types/CoinTypes';
+import { useTheme } from 'next-themes';
+import Image from 'next/image';
 
 const RecentlyViewed: React.FC = () => {
-  const dispatch: AppDispatch = useDispatch<AppDispatch>();
+  const dispatch: AppDispatch = useDispatch();
   const [showAll, setShowAll] = useState(false);
-  const isDarkMode = useSelector((state: RootState) => state.theme.isDarkMode);
+  const { theme } = useTheme();
   const { recentlyViewed, coinDetails } = useSelector((state: RootState) => state.coins);
 
   useEffect(() => {
@@ -26,14 +29,14 @@ const RecentlyViewed: React.FC = () => {
   }, [recentlyViewed, dispatch, coinDetails]);
 
   if (recentlyViewed.length === 0) {
-    return <div>No recently viewed cryptocurrencies.</div>;
+    return <div className="text-gray-900 dark:text-white">No recently viewed cryptocurrencies.</div>;
   }
 
   const displayedCoins = showAll ? recentlyViewed : recentlyViewed.slice(0, 5);
 
   return (
     <div>
-      <h2 className={`font-semibold text-lg ${isDarkMode ? 'text-white bg-gray-950' : 'text-gray-800'} mb-4`}>Recently Viewed</h2>
+      <h2 className={`font-semibold text-lg mb-4`}>Recently Viewed</h2>
       <table className="min-w-full">
         <thead>
           <tr>
@@ -43,10 +46,10 @@ const RecentlyViewed: React.FC = () => {
             <th className="py-2 px-4 ">24h Change</th>
           </tr>
         </thead>
-        <tbody>
-          {displayedCoins.map((coin) => {
-            const currentData = coinDetails[coin.id] ;
-            return (
+          <tbody className="text-gray-500 dark:text-gray-400 font-light">
+            {displayedCoins.map((coin) => {
+              const currentData = coinDetails[coin.id];
+              return (
               <tr key={coin.id}>
                 <td className="py-2 px-4 ">{coin.symbol.toUpperCase()}</td>
                 <td className="py-2 px-4 ">{coin.name}</td>
@@ -68,7 +71,7 @@ const RecentlyViewed: React.FC = () => {
       {recentlyViewed.length > 5 && (
         <button
           onClick={() => setShowAll(!showAll)}
-          className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded text-xs mt-2"
+          className="bg-green-600 hover:bg-green-700 text-white font-bold py-1 px-2 rounded text-xs mt-2"
         >
           {showAll ? 'Show Less' : 'View More'}
         </button>
