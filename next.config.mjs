@@ -5,7 +5,15 @@ const nextConfig = {
   },
   reactStrictMode: true,
   swcMinify: true,
-  // Add any other custom configurations here
+  //  rewrites configuration
+  async rewrites() {
+    return [
+      {
+        source: '/api/coingecko/:path*',
+        destination: 'https://api.coingecko.com/api/v3/:path*',
+      },
+    ];
+  },
 };
 
 export default nextConfig;
