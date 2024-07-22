@@ -53,6 +53,7 @@ Cryptonite is a modern web application designed for tracking a wide range of cry
 
 ## Getting Started
 
+
 To start the development server, run:
 
 ```bash
@@ -63,3 +64,6 @@ yarn dev
 pnpm dev
 # or
 bun dev
+
+# Add API_KEY to .env.local
+for accessing the API, create a 'API_KEY' value from coingekko and add to .env.local file
